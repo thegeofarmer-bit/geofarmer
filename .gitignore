@@ -50,8 +50,6 @@ next-env.d.ts
 .venv/
 __pycache__/
 
-# Copied from node_modules on install
-/public/maplibre/
 
 # Local agent instructions and reports
 AGENTS.md
