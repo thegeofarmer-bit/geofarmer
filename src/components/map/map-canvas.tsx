@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef } from "react";
 import Map, { Layer, Marker, Source, type MapRef } from "react-map-gl/maplibre";
 import type { FilterSpecification, StyleSpecification } from "maplibre-gl";
 import { boundsOf, fillColor, toFeatures } from "./geo";
-import { mapLib } from "./lib";
 import type { MapLayerOption, MapParcel } from "./types";
 import type { MapTheme } from "./use-map-theme";
 
@@ -13,14 +12,12 @@ export function MapCanvas({
   parcels,
   layer,
   selected,
-  showLetters,
   theme,
   onSelect,
 }: {
   parcels: MapParcel[];
   layer?: MapLayerOption;
   selected: string | null;
-  showLetters: boolean;
   theme: MapTheme;
   onSelect: (id: string | null) => void;
 }) {
@@ -42,7 +39,6 @@ export function MapCanvas({
 
   const style: StyleSpecification = {
     version: 8,
-    glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
     sources: {},
     layers: [{ id: "bg", type: "background", paint: { "background-color": theme.bg } }],
   };
@@ -50,7 +46,12 @@ export function MapCanvas({
   return (
     <Map
       ref={mapRef}
-      mapLib={mapLib}
+      reuseMaps
+      dragRotate={false}
+      touchPitch={false}
+      maxPitch={0}
+      fadeDuration={0}
+      pixelRatio={typeof window === "undefined" ? 1 : Math.min(window.devicePixelRatio || 1, 2)}
       initialViewState={{ bounds, fitBoundsOptions: { padding: 40 } }}
       mapStyle={style}
       interactiveLayerIds={["parcels-fill"]}
@@ -78,15 +79,6 @@ export function MapCanvas({
         />
         <Layer id="parcels-selected-halo" type="line" filter={isSelected} paint={{ "line-color": theme.surface, "line-width": 7 }} />
         <Layer id="parcels-selected" type="line" filter={isSelected} paint={{ "line-color": theme.ink, "line-width": 3 }} />
-        {showLetters && (
-          <Layer
-            id="parcels-letter"
-            type="symbol"
-            minzoom={12}
-            layout={{ "text-field": ["get", "letter"], "text-font": ["Noto Sans Bold"], "text-size": 15 }}
-            paint={{ "text-color": theme.ink, "text-halo-color": theme.surface, "text-halo-width": 3 }}
-          />
-        )}
       </Source>
       {selectedParcel && (
         <Marker longitude={selectedParcel.centroid[0]} latitude={selectedParcel.centroid[1]} anchor="bottom" offset={[0, -14]}>
