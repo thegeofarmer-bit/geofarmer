@@ -3,14 +3,10 @@ import { getAdvice } from "@/lib/ai/advice";
 import { getParcelAnalysis } from "@/lib/analysis";
 import { OpenAssistantButton } from "./open-assistant";
 
-function modelName(model: string | null) {
-  return model?.split("/").at(-1)?.replace(/-instruct$/, "") ?? "";
-}
-
 export async function AdvisorCard({ parcelId }: { parcelId: string }) {
   const a = await getParcelAnalysis(parcelId);
   if (!a || a.suitability[0]?.factors.length === 0) return null;
-  const { advice, source, model, reason } = await getAdvice(a);
+  const { advice, source, reason } = await getAdvice(a);
   const ai = source === "ai";
 
   return (
@@ -55,12 +51,8 @@ export async function AdvisorCard({ parcelId }: { parcelId: string }) {
           </ul>
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t-[1.5px] border-line pt-3">
-        <p className="text-xs text-muted">
-          {ai
-            ? `Written by ${modelName(model)} on Cloudflare Workers AI from this parcel's data. Scores come from GeoFarmer's rules.`
-            : `${reason ?? ""} Showing the rules-based summary.`}
-        </p>
+      <div className={`mt-4 flex flex-wrap items-center gap-3 border-t-[1.5px] border-line pt-3 ${ai ? "justify-end" : "justify-between"}`}>
+        {!ai && <p className="text-xs text-muted">{reason} Showing the rules-based summary.</p>}
         <OpenAssistantButton label="Ask about this parcel" question={`Explain the recommendation for parcel ${parcelId}.`} />
       </div>
     </section>
