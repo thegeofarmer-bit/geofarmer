@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Crop } from "../types";
+import { soilSignals } from "../engine/soil-signal";
 import { rankCrops } from "../engine/suitability";
 import { bestClustering, kmeans, standardize } from "./kmeans";
 import { applyLearning, learnAdjustments, MAX_ADJUSTMENT } from "./outcomes";
@@ -87,12 +88,30 @@ describe("learning from outcomes", () => {
 
   it("re-ranks crops and records the base score", () => {
     const crops = [crop("C1", "Alpha"), crop("C2", "Beta")];
-    const base = rankCrops(crops, { mean_slope: 2, soil_sand: 75 });
+    const base = rankCrops(crops, { mean_slope: 2, soil_sand: 75 }).map((r) => ({ ...r, baseScore: r.score }));
     const learned = applyLearning(base, { C2: { delta: 5, harvests: 3, onParcel: 3, onSimilar: 0 } });
     expect(learned[0].crop.crop_name).toBe("Beta");
     expect(learned[0].baseScore).toBe(82);
     expect(learned[0].score).toBe(87);
     const down = applyLearning(base, { C1: { delta: -9, harvests: 3, onParcel: 3, onSimilar: 0 } });
     expect(down.find((r) => r.crop.crop_id === "C1")!.score).toBe(73);
+  });
+});
+
+describe("relative soil signal", () => {
+  const crop = (id: string, fixing: boolean, demand: "Low" | "High"): Crop => ({
+    crop_id: id, crop_name: id, crop_family: id, crop_duration_days: 100, optimal_temp_min_c: 20, optimal_temp_max_c: 30,
+    optimal_ph_min: 5.5, optimal_ph_max: 7, water_requirement: "Moderate", drought_tolerance: "Low",
+    nitrogen_fixing: fixing, nutrient_demand: demand,
+  });
+  const base = rankCrops([crop("Heavy", false, "High"), crop("Legume", true, "Low")], { mean_slope: 2, soil_sand: 75 });
+
+  it("favours legumes and cautions heavy feeders only when nitrogen is relatively low", () => {
+    const low = soilSignals(base, { nitrogen: 20, carbon: 20 });
+    expect(low[0].crop.crop_id).toBe("Legume");
+    expect(low[0].soilSignal?.delta).toBe(8);
+    expect(low.find((r) => r.crop.crop_id === "Heavy")!.soilSignal?.delta).toBe(-5);
+    expect(soilSignals(base, { nitrogen: 50, carbon: 50 })).toBe(base);
+    expect(soilSignals(base, {})).toBe(base);
   });
 });

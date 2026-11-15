@@ -27,6 +27,7 @@ export interface SuitabilityResult {
   missing: MissingFactor[];
   coverage: number;
   baseScore?: number;
+  soilSignal?: { delta: number; reason: string };
   learned?: { delta: number; harvests: number; onParcel: number; onSimilar: number };
 }
 

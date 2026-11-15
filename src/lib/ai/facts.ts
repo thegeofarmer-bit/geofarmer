@@ -12,7 +12,7 @@ export interface AdviceFacts {
   crops: string[];
   suitability: {
     factors_used: string;
-    top: { crop: string; score: number; fit: string; reasons: string[]; learned?: string }[];
+    top: { crop: string; score: number; fit: string; reasons: string[]; soil_signal?: string; learned?: string }[];
   };
   rotation: {
     last_crop: string;
@@ -53,6 +53,7 @@ export function buildFacts(a: ParcelAnalysis): AdviceFacts {
     score: r.score,
     fit: r.fit,
     reasons: r.factors.map((f) => `${f.lead} ${f.detail}`),
+    ...(r.soilSignal ? { soil_signal: `${r.soilSignal.delta > 0 ? "+" : ""}${r.soilSignal.delta}: ${r.soilSignal.reason}` } : {}),
     ...(r.learned && r.learned.delta !== 0
       ? { learned: `${r.learned.delta > 0 ? "+" : ""}${r.learned.delta} from ${r.learned.harvests} recorded harvests (rules alone ${r.baseScore})` }
       : {}),

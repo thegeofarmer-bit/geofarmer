@@ -1,6 +1,7 @@
 import "server-only";
 import { getAllSeasons, getCrops, getDatasets, getEnvironment, getMoisture, getParcel, getSeasons } from "./data";
 import { adviseRotation } from "./engine/rotation";
+import { soilSignals } from "./engine/soil-signal";
 import { rankCrops, type EnvInput } from "./engine/suitability";
 import { getZoneModel } from "./learning/model";
 import { applyLearning, learnAdjustments } from "./learning/outcomes";
@@ -29,7 +30,12 @@ export async function getParcelAnalysis(parcelId: string) {
   const neighbours = zoneModel ? similarParcels(zoneModel, parcelId) : [];
   const zone = zoneModel && parcelId in zoneModel.assignment ? zoneModel.zones[zoneModel.assignment[parcelId]] : null;
   const learned = learnAdjustments(parcelId, allSeasons, neighbours);
-  const suitability = applyLearning(rankCrops(crops, input), learned);
+  const relative = {
+    nitrogen: values.soil_nitrogen ? undefined : values.soil_nitrogen_relative && Number(values.soil_nitrogen_relative.value),
+    carbon: values.soil_organic_carbon ? undefined : values.soil_organic_carbon_relative && Number(values.soil_organic_carbon_relative.value),
+  };
+  const ranked = rankCrops(crops, input).map((r) => ({ ...r, baseScore: r.score }));
+  const suitability = applyLearning(soilSignals(ranked, relative), learned);
   const rotation = adviseRotation(seasons, crops, suitability);
   const datasetById = Object.fromEntries(datasets.map((d) => [d.dataset_id, d]));
   const cropById = Object.fromEntries(crops.map((c) => [c.crop_id, c]));

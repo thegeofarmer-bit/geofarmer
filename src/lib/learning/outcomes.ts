@@ -61,7 +61,7 @@ export function applyLearning(results: SuitabilityResult[], learned: Record<stri
       const l = learned[r.crop.crop_id];
       if (!l || r.factors.length === 0) return r;
       const score = Math.max(0, Math.min(100, r.score + l.delta));
-      return { ...r, baseScore: r.score, score, fit: fitFor(score, r.coverage), learned: l };
+      return { ...r, score, fit: fitFor(score, r.coverage), learned: l };
     })
     .sort((a, b) => b.score - a.score || a.crop.crop_name.localeCompare(b.crop.crop_name));
 }

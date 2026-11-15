@@ -1,4 +1,4 @@
-export const PROMPT_VERSION = "advice-v2";
+export const PROMPT_VERSION = "advice-v3";
 
 export const ADVICE_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 

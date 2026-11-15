@@ -52,6 +52,12 @@ export function SuitabilityCard({ result: r, rank, open }: { result: Suitability
                 </span>
               )}
             </p>
+            {r.soilSignal && (
+              <p className={`mt-1 text-sm font-semibold ${r.soilSignal.delta > 0 ? "text-brand" : "text-warn-ink"}`}>
+                {r.soilSignal.delta > 0 ? "+" : ""}
+                {r.soilSignal.delta} · {r.soilSignal.reason}
+              </p>
+            )}
             {r.learned && r.learned.delta !== 0 && (
               <p className={`mt-1 text-sm font-semibold ${r.learned.delta > 0 ? "text-brand" : "text-bad"}`}>
                 Learned {r.learned.delta > 0 ? "+" : ""}
