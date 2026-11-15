@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4efe4;
+  --surface: #fffdf7;
+  --surface-2: #ebe4d4;
+  --line: #ddd2bf;
+  --line-strong: #7a6d5a;
+  --ink: #221b14;
+  --muted: #5f5243;
+  --brand: #17572f;
+  --brand-ink: #fffdf7;
+  --brand-soft: #dce9da;
+  --accent: #e6a817;
+  --warn-bg: #fbedc4;
+  --warn-line: #7a5a00;
+  --warn-ink: #6b4d00;
+  --info-bg: #d8eaf0;
+  --info-line: #155a7a;
+  --info-ink: #0f4a66;
+  --bad: #a3361c;
+  --map-bg: #e9e2d2;
+  --map-road: #5f5243;
+  --map-river: #1d6e93;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15120e;
+    --surface: #1f1a15;
+    --surface-2: #2a241d;
+    --line: #3a3229;
+    --line-strong: #a89880;
+    --ink: #f6f1e7;
+    --muted: #c9bba6;
+    --brand: #86d19b;
+    --brand-ink: #10241a;
+    --brand-soft: #1d3a27;
+    --accent: #f0be45;
+    --warn-bg: #3a2c0c;
+    --warn-line: #e3b341;
+    --warn-ink: #f2cf72;
+    --info-bg: #10303d;
+    --info-line: #5fb4d6;
+    --info-ink: #a6d8ec;
+    --bad: #f08a6c;
+    --map-bg: #221d17;
+    --map-road: #a89880;
+    --map-river: #4aa3c9;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-line: var(--warn-line);
+  --color-warn-ink: var(--warn-ink);
+  --color-info-bg: var(--info-bg);
+  --color-info-line: var(--info-line);
+  --color-info-ink: var(--info-ink);
+  --color-bad: var(--bad);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono-face);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--accent) 28%, transparent) 0 8px,
+    transparent 8px 16px
+  );
+}
+
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 1.5rem;
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
