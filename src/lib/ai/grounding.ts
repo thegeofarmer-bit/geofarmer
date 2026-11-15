@@ -51,8 +51,14 @@ export function foreignCrops(text: string, crops: string[]): string[] {
   return OTHER_CROPS.filter((c) => !known.has(c) && new RegExp(`\\b${c}(?:e?s)?\\b`).test(lower));
 }
 
+const PROMISE = /\b(guarantee[sd]?|will definitely|certain to)\b/gi;
+const NEGATION = /\b(not|no|never|without|cannot|can't)\b[^.]{0,20}$/i;
+
 export function promisesOutcome(text: string): boolean {
-  return /\b(guarantee[sd]?|will definitely|certain to)\b/i.test(text);
+  for (const m of text.matchAll(PROMISE)) {
+    if (!NEGATION.test(text.slice(Math.max(0, m.index - 30), m.index))) return true;
+  }
+  return false;
 }
 
 export function groundingIssues(advice: Advice, facts: AdviceFacts): string[] {

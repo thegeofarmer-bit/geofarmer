@@ -45,6 +45,8 @@ describe("grounding", () => {
   it("rejects crops outside the reference table and promises", () => {
     expect(foreignCrops("Try tomatoes or cocoa.", facts.crops)).toEqual(["tomato", "cocoa"]);
     expect(groundingIssues({ ...good, summary: "This will guarantee a big harvest." }, facts)).toContain("promises an outcome");
+    expect(groundingIssues({ ...good, summary: "This is not a guarantee of yield." }, facts)).toEqual([]);
+    expect(groundingIssues({ ...good, summary: "Results are guaranteed." }, facts)).toContain("promises an outcome");
   });
 });
 
