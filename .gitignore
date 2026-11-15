@@ -62,3 +62,6 @@ REPORT.md
 /*.tif
 /*.tfw
 /*.aux.xml
+
+# Database migrations are kept out of the repository
+/supabase/
