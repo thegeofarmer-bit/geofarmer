@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ParcelSubtitle } from "@/components/parcel/parcel-subtitle";
+import { OpenAssistantButton } from "@/components/assistant/open-assistant";
 import { SimulatedBadge } from "@/components/ui/badges";
 import { Icon } from "@/components/ui/icon";
 import { getParcel } from "@/lib/data";
@@ -25,9 +26,12 @@ export async function ParcelSheet({ id }: { id: string }) {
       >
         <Icon name="sprout" size={26} /> Assess crops
       </Link>
-      <Link href={`/parcel/${id}`} className="mt-3 block text-center font-semibold text-brand underline">
-        View environment and history
-      </Link>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <Link href={`/parcel/${id}`} className="font-semibold text-brand underline">
+          Environment and history
+        </Link>
+        <OpenAssistantButton label="Ask AI" question={`Explain the recommendation for parcel ${id}.`} className="shrink-0" />
+      </div>
     </div>
   );
 }

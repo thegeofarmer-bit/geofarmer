@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   title: { default: "GeoFarmer", template: "%s · GeoFarmer" },
   description:
     "Crop suitability and rotation decision support for Ejura-Sekyedumase farms, built on NASA and SoilGrids data.",
-  icons: { icon: "/brand/geofarmer-mark.svg", apple: "/brand/geofarmer-app-icon.png" },
 };
 
 export const viewport: Viewport = {
