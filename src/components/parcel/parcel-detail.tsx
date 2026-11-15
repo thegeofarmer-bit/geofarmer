@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import Link from "next/link";
+import { AdvisorCard, AdvisorSkeleton } from "@/components/assistant/advisor-card";
 import { notFound } from "next/navigation";
 import { AssignFarmerForm } from "@/components/forms/assign-farmer-form";
 import { SimulatedBadge } from "@/components/ui/badges";
@@ -39,6 +41,12 @@ export async function ParcelDetail({ id, saved }: { id: string; saved: boolean }
           </Callout>
         </div>
       )}
+
+      <div className="mb-6">
+        <Suspense fallback={<AdvisorSkeleton />}>
+          <AdvisorCard parcelId={id} />
+        </Suspense>
+      </div>
 
       <EnvironmentList a={a} />
 

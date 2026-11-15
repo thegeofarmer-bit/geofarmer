@@ -2,7 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { writeClient } from "../supabase";
 
-export const DAILY_NEURON_BUDGET = 9000;
+const DAILY_NEURON_BUDGET = 9000;
 
 export interface CachedAnswer<T> {
   content: T;

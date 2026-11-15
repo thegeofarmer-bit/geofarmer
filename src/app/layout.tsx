@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Suspense } from "react";
+import { AssistantLauncher } from "@/components/assistant/assistant-launcher";
 import { BottomNav, BottomNavView, Sidebar, SidebarView } from "@/components/layout/nav";
 import "./globals.css";
 
@@ -33,6 +34,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </div>
         <Suspense fallback={<BottomNavView pathname="" />}>
           <BottomNav />
+        </Suspense>
+        <Suspense fallback={null}>
+          <AssistantLauncher />
         </Suspense>
       </body>
     </html>

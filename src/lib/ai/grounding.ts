@@ -18,17 +18,41 @@ const OTHER_CROPS = [
 
 const NUMBER = /\d+(?:[.,]\d+)*/g;
 
-function normalise(n: string): string[] {
-  const v = Number(n.replace(/,/g, ""));
-  if (Number.isNaN(v)) return [n];
-  return [String(v), v.toFixed(0), v.toFixed(1), v.toFixed(2)];
+function parse(n: string): number {
+  return Number(n.replace(/,(?=\d{3}\b)/g, ""));
 }
 
-function allowedNumbers(facts: AdviceFacts): Set<string> {
-  const allowed = new Set<string>();
-  for (const m of JSON.stringify(facts).match(NUMBER) ?? []) for (const v of normalise(m)) allowed.add(v);
-  for (const m of facts.parcel.id.match(/\d+/g) ?? []) allowed.add(String(Number(m)));
-  return allowed;
+function decimals(n: string): number {
+  return n.replace(/,(?=\d{3}\b)/g, "").split(".")[1]?.length ?? 0;
+}
+
+function sourceValues(sources: unknown[]): number[] {
+  const values: number[] = [];
+  for (const src of sources) {
+    const text = typeof src === "string" ? src : JSON.stringify(src);
+    for (const m of text.match(NUMBER) ?? []) values.push(parse(m));
+  }
+  return values;
+}
+
+export function strayNumbers(text: string, sources: unknown[]): string[] {
+  const values = sourceValues(sources);
+  const ok = (n: string) => {
+    const v = parse(n);
+    const d = decimals(n);
+    return values.some((a) => Number(a.toFixed(d)) === v);
+  };
+  return [...new Set((text.match(NUMBER) ?? []).filter((n) => !ok(n)))];
+}
+
+export function foreignCrops(text: string, crops: string[]): string[] {
+  const lower = text.toLowerCase();
+  const known = new Set(crops.map((c) => c.toLowerCase()));
+  return OTHER_CROPS.filter((c) => !known.has(c) && new RegExp(`\\b${c}(?:e?s)?\\b`).test(lower));
+}
+
+export function promisesOutcome(text: string): boolean {
+  return /\b(guarantee[sd]?|will definitely|certain to)\b/i.test(text);
 }
 
 export function groundingIssues(advice: Advice, facts: AdviceFacts): string[] {
@@ -39,15 +63,10 @@ export function groundingIssues(advice: Advice, facts: AdviceFacts): string[] {
   }
 
   const text = [advice.headline, advice.summary, ...advice.next_steps, ...advice.cautions].join(" ");
-  const allowed = allowedNumbers(facts);
-  const stray = (text.match(NUMBER) ?? []).filter((n) => !normalise(n).some((v) => allowed.has(v)));
-  if (stray.length) issues.push(`numbers not in the facts: ${[...new Set(stray)].join(", ")}`);
-
-  const lower = text.toLowerCase();
-  const known = new Set(facts.crops.map((c) => c.toLowerCase()));
-  const foreign = OTHER_CROPS.filter((c) => !known.has(c) && new RegExp(`\\b${c}s?\\b`).test(lower));
+  const stray = strayNumbers(text, [facts]);
+  if (stray.length) issues.push(`numbers not in the facts: ${stray.join(", ")}`);
+  const foreign = foreignCrops(text, facts.crops);
   if (foreign.length) issues.push(`crops not in the reference table: ${foreign.join(", ")}`);
-
-  if (/\b(guarantee[sd]?|will definitely|certain to)\b/.test(lower)) issues.push("promises an outcome");
+  if (promisesOutcome(text)) issues.push("promises an outcome");
   return issues;
 }

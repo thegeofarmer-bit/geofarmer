@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { AdvisorCard, AdvisorSkeleton } from "@/components/assistant/advisor-card";
 import { PageHeader } from "@/components/ui/page";
 import { getParcelAnalysis } from "@/lib/analysis";
 import { formatHectares } from "@/lib/format";
@@ -13,6 +15,9 @@ export async function CropsView({ id }: { id: string }) {
     <>
       <PageHeader back={`/parcel/${id}`} kicker={`Parcel ${id}${area ? ` · ${area}` : ""}`} title="Best crops here" />
       <div className="space-y-5">
+        <Suspense fallback={<AdvisorSkeleton />}>
+          <AdvisorCard parcelId={id} />
+        </Suspense>
         <MissingBanner result={a.suitability[0]} />
         <SuitabilityList a={a} />
         <p className="pb-4 text-sm text-muted">

@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import Link from "next/link";
+import { AdvisorCard, AdvisorSkeleton } from "@/components/assistant/advisor-card";
 import { EnvironmentList } from "@/components/parcel/environment-list";
 import { MissingBanner } from "@/components/parcel/missing-banner";
 import { ParcelSubtitle } from "@/components/parcel/parcel-subtitle";
@@ -51,6 +53,9 @@ export async function ParcelPanel({ id, tab, layer }: { id: string; tab: string;
         <RotationCard a={a} />
       ) : (
         <>
+          <Suspense fallback={<AdvisorSkeleton />}>
+            <AdvisorCard parcelId={id} />
+          </Suspense>
           <EnvironmentList a={a} />
           <Link
             href={tabHref("crops")}
