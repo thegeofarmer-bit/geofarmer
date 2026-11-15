@@ -5,7 +5,16 @@ export function MapLegend({ layer, items }: { layer?: MapLayerOption; items: Leg
   const range = valueRange(layer);
   return (
     <div className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] rounded-2xl border-2 border-line-strong bg-surface px-4 py-3 shadow-sm max-lg:top-36 max-lg:bottom-auto">
-      {layer && range ? (
+      {layer?.categories ? (
+        <ul className="space-y-1">
+          {layer.categories.map((c) => (
+            <li key={c.value} className="flex items-center gap-2 text-[15px]">
+              <span className="h-4 w-4 shrink-0 rounded border-[1.5px] border-ink" style={{ background: c.color }} />
+              {c.label}
+            </li>
+          ))}
+        </ul>
+      ) : layer && range ? (
         <div className="w-52">
           <p className="font-semibold">
             {layer.label} <span className="text-muted">({layer.unit})</span>

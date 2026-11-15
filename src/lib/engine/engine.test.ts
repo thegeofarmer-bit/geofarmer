@@ -31,7 +31,7 @@ const season = (crop_id: string, planting_date: string): CropSeason => ({
   season_id: `S-${crop_id}-${planting_date}`, parcel_id: "P001", crop_id, season_name: "Major",
   season_year: Number(planting_date.slice(0, 4)), planting_date, expected_harvest_date: null,
   actual_harvest_date: null, crop_variety: null, crop_status: "Harvested", planting_method: "Rows",
-  is_simulated: true, created_at: planting_date,
+  is_simulated: true, created_at: planting_date, outcome: null, yield_kg_per_ha: null, outcome_note: null,
 });
 
 describe("rangeScore", () => {

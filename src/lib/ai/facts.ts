@@ -7,10 +7,12 @@ export interface AdviceFacts {
   observed: { name: string; value: number; unit: string; source: string }[];
   relative: { name: string; level: string; position_0_to_100: number }[];
   missing: string[];
+  land_zone: { name: string; parcels_in_zone: number; learned_from: string } | null;
+  similar_parcels: string[];
   crops: string[];
   suitability: {
     factors_used: string;
-    top: { crop: string; score: number; fit: string; reasons: string[] }[];
+    top: { crop: string; score: number; fit: string; reasons: string[]; learned?: string }[];
   };
   rotation: {
     last_crop: string;
@@ -51,6 +53,9 @@ export function buildFacts(a: ParcelAnalysis): AdviceFacts {
     score: r.score,
     fit: r.fit,
     reasons: r.factors.map((f) => `${f.lead} ${f.detail}`),
+    ...(r.learned && r.learned.delta !== 0
+      ? { learned: `${r.learned.delta > 0 ? "+" : ""}${r.learned.delta} from ${r.learned.harvests} recorded harvests (rules alone ${r.baseScore})` }
+      : {}),
   }));
   const used = a.suitability[0]?.factors.length ?? 0;
   const rot = a.rotation;
@@ -65,6 +70,10 @@ export function buildFacts(a: ParcelAnalysis): AdviceFacts {
     observed,
     relative,
     missing,
+    land_zone: a.zone
+      ? { name: a.zone.name, parcels_in_zone: a.zone.size, learned_from: "k-means clustering of terrain and soil data" }
+      : null,
+    similar_parcels: a.neighbours.map((n) => n.parcelId),
     crops: a.crops.map((c) => c.crop_name),
     suitability: { factors_used: `${used} of ${FACTOR_COUNT}`, top },
     rotation:

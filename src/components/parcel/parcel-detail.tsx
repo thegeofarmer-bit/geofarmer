@@ -12,6 +12,7 @@ import { getFarmers } from "@/lib/data";
 import { EnvironmentList } from "./environment-list";
 import { ParcelSubtitle } from "./parcel-subtitle";
 import { SeasonHistory } from "./season-history";
+import { ZoneCard } from "./zone-card";
 
 export async function ParcelDetail({ id, saved }: { id: string; saved: boolean }) {
   const [a, farmers] = await Promise.all([getParcelAnalysis(id), getFarmers()]);
@@ -49,6 +50,10 @@ export async function ParcelDetail({ id, saved }: { id: string; saved: boolean }
       </div>
 
       <EnvironmentList a={a} />
+
+      <div className="mt-6">
+        <ZoneCard a={a} />
+      </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3">
         <Link

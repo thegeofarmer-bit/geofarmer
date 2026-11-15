@@ -12,6 +12,11 @@ const METHOD = {
     "From the last recorded crop: same crop -40 points, same family -25, legume after cereal +10, other family +5, " +
     "nitrogen fixer after a heavy feeder +25 (else +15), heavy feeder after legume +15, heavy after heavy -10, " +
     "grown in the 2 seasons before -10, over 200 days -5, plus 30% of the suitability score. Highest wins.",
+  learning:
+    "GeoFarmer learns in two ways. 1) Land zones: k-means clustering groups parcels with similar slope, elevation, " +
+    "sand and relative soil levels; the number of zones is chosen by silhouette score. 2) Outcomes: when a season is " +
+    "marked Poor, Fair, Good or Failed, that crop's score is adjusted on that parcel and on its most similar parcels " +
+    "(bounded, and small until several harvests are recorded). The rules remain the starting point.",
   data_rules:
     "Farm parcels and farmers are simulated demo records. Elevation and slope come from NASA SRTM. Sand comes from " +
     "ISRIC SoilGrids. Soil pH, organic carbon and nitrogen are relative levels only (rendered maps). Rainfall, " +

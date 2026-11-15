@@ -52,6 +52,13 @@ export function SuitabilityCard({ result: r, rank, open }: { result: Suitability
                 </span>
               )}
             </p>
+            {r.learned && r.learned.delta !== 0 && (
+              <p className={`mt-1 text-sm font-semibold ${r.learned.delta > 0 ? "text-brand" : "text-bad"}`}>
+                Learned {r.learned.delta > 0 ? "+" : ""}
+                {r.learned.delta} from {r.learned.harvests} recorded harvest{r.learned.harvests === 1 ? "" : "s"}
+                {r.learned.onSimilar > 0 ? ` (${r.learned.onSimilar} on similar parcels)` : ""} · rules alone: {r.baseScore}
+              </p>
+            )}
             <div className="mt-2 h-3 overflow-hidden rounded-full border-[1.5px] border-line-strong bg-surface-2">
               <div className="h-full bg-brand" style={{ width: `${r.score}%` }} />
             </div>

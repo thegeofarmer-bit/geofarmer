@@ -33,6 +33,14 @@ export function valueRange(layer?: MapLayerOption) {
 }
 
 export function fillColor(layer?: MapLayerOption): ExpressionSpecification {
+  if (layer?.categories?.length) {
+    return [
+      "match",
+      ["get", "value"],
+      ...layer.categories.flatMap((c) => [c.value, c.color]),
+      "#b9ae9a",
+    ] as unknown as ExpressionSpecification;
+  }
   const range = valueRange(layer);
   if (!layer || !range) return ["get", "color"];
   const max = range.max > range.min ? range.max : range.min + 1;

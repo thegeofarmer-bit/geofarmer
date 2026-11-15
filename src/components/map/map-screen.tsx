@@ -3,11 +3,12 @@ import { Icon } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/page";
 import { NO_CROP_COLOR, cropColor } from "@/lib/crops";
 import { getParcels, getVariableByParcel } from "@/lib/data";
+import { getZoneModel } from "@/lib/learning/model";
 import { MAP_LAYERS } from "@/lib/variables";
 import { MapView } from "./map-view";
 import { ParcelPanel } from "./parcel-panel";
 import { ParcelSheet } from "./parcel-sheet";
-import type { MapParcel } from "./types";
+import type { MapLayerOption, MapParcel } from "./types";
 
 async function layerValues(key: string, relativeKey?: string) {
   const values = await getVariableByParcel(key);
@@ -16,8 +17,9 @@ async function layerValues(key: string, relativeKey?: string) {
 }
 
 export async function MapScreen({ selected, layer, tab }: { selected: string | null; layer: string; tab: string }) {
-  const [parcels, ...values] = await Promise.all([
+  const [parcels, zoneModel, ...values] = await Promise.all([
     getParcels(),
+    getZoneModel(),
     ...MAP_LAYERS.map((l) => layerValues(l.key, l.relativeKey)),
   ]);
 
@@ -31,7 +33,7 @@ export async function MapScreen({ selected, layer, tab }: { selected: string | n
       geometry: p.geometry!,
       centroid: [p.centroid_lon!, p.centroid_lat!],
     }));
-  const layers = MAP_LAYERS.map((l, i) => {
+  const layers: MapLayerOption[] = MAP_LAYERS.map((l, i) => {
     const label = l.label === "Soil texture" ? "Sand" : l.label;
     const { values: v, relative } = values[i];
     return {
@@ -42,6 +44,16 @@ export async function MapScreen({ selected, layer, tab }: { selected: string | n
       values: v,
     };
   });
+  if (zoneModel) {
+    layers.unshift({
+      key: "zones",
+      label: "Land zones",
+      unit: "",
+      ramp: ["#000", "#000"],
+      values: zoneModel.assignment,
+      categories: zoneModel.zones.map((z) => ({ value: z.id, label: `${z.name} (${z.size})`, color: z.color })),
+    });
+  }
   const grown = [...new Set(parcels.map((p) => p.latest_crop_name).filter((c): c is string => Boolean(c)))];
   const legend = [
     ...grown.map((name) => ({ name, color: cropColor(name) })),

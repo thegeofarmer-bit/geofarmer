@@ -8,6 +8,8 @@ const facts: AdviceFacts = {
   observed: [{ name: "slope", value: 2.5, unit: "°", source: "NASA SRTM" }],
   relative: [{ name: "soil ph", level: "Medium", position_0_to_100: 56 }],
   missing: ["rainfall", "temperature"],
+  land_zone: { name: "Zone B: high carbon", parcels_in_zone: 77, learned_from: "k-means" },
+  similar_parcels: ["P005"],
   crops: ["Maize", "Cowpea", "Rice"],
   suitability: { factors_used: "2 of 6", top: [{ crop: "Cowpea", score: 100, fit: "Limited data", reasons: [] }] },
   rotation: {

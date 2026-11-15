@@ -26,6 +26,8 @@ export interface SuitabilityResult {
   factors: FactorResult[];
   missing: MissingFactor[];
   coverage: number;
+  baseScore?: number;
+  learned?: { delta: number; harvests: number; onParcel: number; onSimilar: number };
 }
 
 export type EnvInput = Partial<Record<
@@ -153,6 +155,10 @@ function nitrogen(crop: Crop, n: number): Omit<FactorResult, "weight" | "key" | 
 
 const EVAL = { temperature, ph, rainfall, texture, slope, nitrogen } as const;
 
+export function fitFor(score: number, coverage: number): SuitabilityResult["fit"] {
+  return coverage < 0.5 ? "Limited data" : score >= 75 ? "High fit" : score >= 55 ? "Moderate fit" : "Low fit";
+}
+
 export function assessCrop(crop: Crop, env: EnvInput): SuitabilityResult {
   const factors: FactorResult[] = [];
   const missing: MissingFactor[] = [];
@@ -170,7 +176,7 @@ export function assessCrop(crop: Crop, env: EnvInput): SuitabilityResult {
   return {
     crop,
     score,
-    fit: coverage < 0.5 ? "Limited data" : score >= 75 ? "High fit" : score >= 55 ? "Moderate fit" : "Low fit",
+    fit: fitFor(score, coverage),
     factors: factors.sort((a, b) => b.score - a.score || b.weight - a.weight),
     missing,
     coverage,

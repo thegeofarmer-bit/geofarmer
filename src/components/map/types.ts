@@ -17,6 +17,7 @@ export interface MapLayerOption {
   unit: string;
   ramp: [string, string];
   values: Record<string, number>;
+  categories?: { value: number; label: string; color: string }[];
 }
 
 export interface LegendItem {

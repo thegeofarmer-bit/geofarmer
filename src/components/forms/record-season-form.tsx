@@ -5,7 +5,9 @@ import { recordSeason } from "@/actions/seasons";
 import { Callout } from "@/components/ui/callout";
 import { Icon } from "@/components/ui/icon";
 import type { Crop } from "@/lib/types";
+import type { PlantingDraft } from "@/lib/ai/planting";
 import { Status, Submit, addDays, field, label } from "./form-parts";
+import { PlantingAssistant } from "./planting-assistant";
 
 export function RecordSeasonForm({ parcelId, crops, defaultCrop }: { parcelId: string; crops: Crop[]; defaultCrop?: string }) {
   const [state, action, pending] = useActionState(recordSeason, null);
@@ -22,8 +24,17 @@ export function RecordSeasonForm({ parcelId, crops, defaultCrop }: { parcelId: s
   const harvest = harvestEdited ?? (crop ? addDays(planting, crop.crop_duration_days) : "");
   const year = planting.slice(0, 4);
 
+  const applyDraft = (d: PlantingDraft) => {
+    if (d.crop_id) setCropId(d.crop_id);
+    if (d.season_name) setSeason(d.season_name);
+    if (d.planting_method) setMethod(d.planting_method);
+    if (d.planting_date) setPlanting(d.planting_date);
+    setHarvestEdited(d.expected_harvest_date);
+  };
+
   return (
     <form action={action} className="space-y-6">
+      <PlantingAssistant onFill={applyDraft} />
       <input type="hidden" name="parcel_id" value={parcelId} />
       <div>
         <label htmlFor="crop" className={label}>Crop</label>

@@ -51,6 +51,9 @@ const StatusInput = z.object({
   parcel_id: z.string().min(1),
   crop_status: z.enum(["Planned", "Growing", "Harvested", "Failed"]),
   actual_harvest_date: date.or(z.literal("")),
+  outcome: z.enum(["Poor", "Fair", "Good"]).or(z.literal("")),
+  yield_kg_per_ha: z.string().regex(/^\d{0,6}(\.\d+)?$/, "Yield must be a number").optional(),
+  outcome_note: z.string().max(300).optional(),
 });
 
 export async function updateSeasonStatus(_: FormState, form: FormData): Promise<FormState> {
@@ -69,9 +72,19 @@ export async function updateSeasonStatus(_: FormState, form: FormData): Promise<
   if (logError) return { error: logError.message };
   const { error } = await db
     .from("crop_seasons")
-    .update({ crop_status: v.crop_status, actual_harvest_date: v.actual_harvest_date || null })
+    .update({
+      crop_status: v.crop_status,
+      actual_harvest_date: v.actual_harvest_date || null,
+      outcome: v.outcome || null,
+      yield_kg_per_ha: v.yield_kg_per_ha ? Number(v.yield_kg_per_ha) : null,
+      outcome_note: v.outcome_note?.trim() || null,
+    })
     .eq("season_id", v.season_id);
   if (error) return { error: error.message };
   updateTag(DATA_TAG);
-  return { ok: "Season updated. The previous version was kept in the history log." };
+  return {
+    ok: v.outcome
+      ? "Season updated. GeoFarmer will learn from this outcome; the previous version was kept."
+      : "Season updated. The previous version was kept in the history log.",
+  };
 }

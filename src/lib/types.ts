@@ -68,6 +68,9 @@ export interface CropSeason {
   crop_variety: string | null;
   crop_status: "Planned" | "Growing" | "Harvested" | "Failed";
   planting_method: "Rows" | "Broadcast" | "Mounds" | "Ridges" | null;
+  outcome: "Poor" | "Fair" | "Good" | null;
+  yield_kg_per_ha: number | null;
+  outcome_note: string | null;
   is_simulated: boolean;
   created_at: string;
 }

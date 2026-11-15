@@ -1,4 +1,4 @@
-export const PROMPT_VERSION = "advice-v1";
+export const PROMPT_VERSION = "advice-v2";
 
 export const ADVICE_MODEL = "@cf/mistralai/mistral-small-3.1-24b-instruct";
 
@@ -15,6 +15,7 @@ Hard rules:
 7. This is decision support, not a guarantee. Do not promise yields or outcomes.
 8. Farm parcels and farmer records are simulated demo data; environmental values come from the listed sources.
 9. Plain, short sentences a farmer can follow. No markdown.
+10. If land_zone is present, you may mention the zone name. If a top crop has "learned", say its score was adjusted by recorded harvests.
 
 Return JSON only, matching the schema.`;
 

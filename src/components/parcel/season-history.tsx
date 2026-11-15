@@ -22,10 +22,17 @@ function SeasonItem({ season: s, crop }: { season: CropSeason; crop?: Crop }) {
             {s.planting_method ? ` · ${s.planting_method}` : ""} · expected harvest {formatDate(s.expected_harvest_date)}
             {s.actual_harvest_date ? ` · harvested ${formatDate(s.actual_harvest_date)}` : ""}
           </p>
+          {s.outcome && (
+            <p className="mt-1 text-sm font-semibold">
+              Outcome: {s.outcome}
+              {s.yield_kg_per_ha != null ? ` · ${s.yield_kg_per_ha} kg/ha` : ""}
+              {s.outcome_note ? ` · ${s.outcome_note}` : ""}
+            </p>
+          )}
         </div>
       </div>
       <details className="mt-2">
-        <summary className="cursor-pointer font-semibold text-brand">Update status or harvest date</summary>
+        <summary className="cursor-pointer font-semibold text-brand">Update status, harvest or outcome</summary>
         <SeasonStatusForm season={s} />
       </details>
     </li>
