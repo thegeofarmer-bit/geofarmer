@@ -1,10 +1,10 @@
 import { valueRange } from "./geo";
 import type { LegendItem, MapLayerOption } from "./types";
 
-export function MapLegend({ layer, items }: { layer?: MapLayerOption; items: LegendItem[] }) {
+export function MapLegend({ layer, items, className = "" }: { layer?: MapLayerOption; items: LegendItem[]; className?: string }) {
   const range = valueRange(layer);
   return (
-    <div className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] rounded-2xl border-2 border-line-strong bg-surface px-4 py-3 shadow-sm max-lg:top-36 max-lg:bottom-auto">
+    <div className={`pointer-events-auto min-w-0 rounded-2xl border-2 border-line-strong bg-surface px-4 py-3 shadow-sm ${className}`}>
       {layer?.categories ? (
         <ul className="space-y-1">
           {layer.categories.map((c) => (
@@ -15,7 +15,7 @@ export function MapLegend({ layer, items }: { layer?: MapLayerOption; items: Leg
           ))}
         </ul>
       ) : layer && range ? (
-        <div className="w-52">
+        <div className="w-52 max-w-full">
           <p className="font-semibold">
             {layer.label} <span className="text-muted">({layer.unit})</span>
           </p>
@@ -29,7 +29,7 @@ export function MapLegend({ layer, items }: { layer?: MapLayerOption; items: Leg
           </div>
         </div>
       ) : (
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-1">
+        <ul className="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
           {items.map((l) => (
             <li key={l.name} className="flex items-center gap-2 text-[15px]">
               <span className="h-4 w-4 rounded border-[1.5px] border-ink" style={{ background: l.color }} />

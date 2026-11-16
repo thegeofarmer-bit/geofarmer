@@ -1,15 +1,17 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { use, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
 import { BasemapToggle, useBasemap } from "./basemap";
 import { LayerChips } from "./layer-chips";
+import { MapLoading } from "./map-loading";
 import { MapCanvas } from "./map-canvas";
 import { MapLegend } from "./map-legend";
 import { MapSearch } from "./map-search";
 import { CROP_LAYER } from "./types";
-import { useMapData, webglSupported } from "./use-map-data";
+import { mapData, webglSupported } from "./use-map-data";
 import { useMapParams } from "./use-map-params";
 import { useMapTheme } from "./use-map-theme";
 
@@ -28,24 +30,19 @@ function Notice({ title, body }: { title: string; body: string }) {
   );
 }
 
-export function MapView({ selected, layer }: { selected: string | null; layer: string }) {
+export function MapView() {
+  const params = useSearchParams();
+  const selected = params.get("parcel");
+  const layer = params.get("layer") ?? CROP_LAYER;
   const theme = useMapTheme();
   const go = useMapParams();
-  const { data, error } = useMapData();
+  const data = typeof window === "undefined" ? undefined : use(mapData());
   const [basemap, setBasemap] = useBasemap();
   const webgl = useSyncExternalStore(noop, webglSupported, () => true);
 
   if (!webgl) return <Notice title="This phone can't draw the map" body="Its browser has no WebGL support. Every parcel is still available as a list." />;
-  if (error) return <Notice title="The map didn't load" body="Check your connection and reopen the map, or browse the parcels as a list." />;
-  if (!theme || !data) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-surface-2" aria-busy="true">
-        <p className="flex items-center gap-2 font-semibold text-muted">
-          <Icon name="map" size={22} className="animate-pulse" /> Loading the map…
-        </p>
-      </div>
-    );
-  }
+  if (data === null) return <Notice title="The map didn't load" body="Check your connection and reopen the map, or browse the parcels as a list." />;
+  if (!theme || !data) return <MapLoading />;
 
   const active = data.layers.find((l) => l.key === layer);
   return (
@@ -54,9 +51,13 @@ export function MapView({ selected, layer }: { selected: string | null; layer: s
       <div className="pointer-events-none absolute inset-x-0 top-0 space-y-3 p-4">
         <MapSearch parcels={data.parcels} onSelect={(id) => go({ parcel: id })} />
         <LayerChips layers={data.layers} active={layer} onChange={(key) => go({ layer: key === CROP_LAYER ? null : key })} />
+        <div className="flex items-start gap-3 lg:hidden">
+          <MapLegend layer={active} items={data.legend} className="flex-1" />
+          <BasemapToggle value={basemap} onChange={setBasemap} />
+        </div>
       </div>
-      <MapLegend layer={active} items={data.legend} />
-      <BasemapToggle value={basemap} onChange={setBasemap} />
+      <MapLegend layer={active} items={data.legend} className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] max-lg:hidden" />
+      <BasemapToggle value={basemap} onChange={setBasemap} className="absolute right-4 bottom-10 max-lg:hidden" />
     </div>
   );
 }

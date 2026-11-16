@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 export interface MapTheme {
   bg: string;
@@ -10,20 +10,24 @@ export interface MapTheme {
   surface: string;
 }
 
-function readTheme(): MapTheme {
+const VARS = ["--map-bg", "--map-road", "--map-river", "--ink", "--surface"] as const;
+
+function snapshot(): string {
   const css = getComputedStyle(document.documentElement);
-  const v = (n: string) => css.getPropertyValue(n).trim();
-  return { bg: v("--map-bg"), road: v("--map-road"), river: v("--map-river"), ink: v("--ink"), surface: v("--surface") };
+  return VARS.map((v) => css.getPropertyValue(v).trim()).join("|");
 }
 
-export function useMapTheme() {
-  const [theme, setTheme] = useState<MapTheme | null>(null);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const update = () => setTheme(readTheme());
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return theme;
+function subscribe(onChange: () => void) {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+export function useMapTheme(): MapTheme | null {
+  const key = useSyncExternalStore(subscribe, snapshot, () => "");
+  return useMemo(() => {
+    if (!key) return null;
+    const [bg, road, river, ink, surface] = key.split("|") as [string, string, string, string, string];
+    return { bg, road, river, ink, surface };
+  }, [key]);
 }

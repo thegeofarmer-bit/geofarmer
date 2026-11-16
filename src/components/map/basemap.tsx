@@ -61,7 +61,7 @@ export function baseStyle(basemap: Basemap, bg: string): StyleSpecification {
   };
 }
 
-export function BasemapToggle({ value, onChange }: { value: Basemap; onChange: (b: Basemap) => void }) {
+export function BasemapToggle({ value, onChange, className = "" }: { value: Basemap; onChange: (b: Basemap) => void; className?: string }) {
   const option = (b: Basemap, label: string) => (
     <button
       type="button"
@@ -73,7 +73,7 @@ export function BasemapToggle({ value, onChange }: { value: Basemap; onChange: (
     </button>
   );
   return (
-    <div className="absolute right-4 z-10 flex overflow-hidden rounded-full border-2 border-line-strong shadow-sm max-lg:top-36 lg:bottom-10">
+    <div className={`pointer-events-auto flex shrink-0 overflow-hidden rounded-full border-2 border-line-strong shadow-sm ${className}`}>
       {option("satellite", "Satellite")}
       {option("plain", "Map")}
     </div>
