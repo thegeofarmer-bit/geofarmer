@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import { BasemapToggle, useBasemap } from "./basemap";
 import { LayerChips } from "./layer-chips";
 import { MapCanvas } from "./map-canvas";
 import { MapLegend } from "./map-legend";
@@ -31,6 +32,7 @@ export function MapView({ selected, layer }: { selected: string | null; layer: s
   const theme = useMapTheme();
   const go = useMapParams();
   const { data, error } = useMapData();
+  const [basemap, setBasemap] = useBasemap();
   const webgl = useSyncExternalStore(noop, webglSupported, () => true);
 
   if (!webgl) return <Notice title="This phone can't draw the map" body="Its browser has no WebGL support. Every parcel is still available as a list." />;
@@ -48,12 +50,13 @@ export function MapView({ selected, layer }: { selected: string | null; layer: s
   const active = data.layers.find((l) => l.key === layer);
   return (
     <div className="relative h-full w-full">
-      <MapCanvas parcels={data.parcels} layer={active} selected={selected} theme={theme} onSelect={(id) => go({ parcel: id })} />
+      <MapCanvas parcels={data.parcels} layer={active} selected={selected} theme={theme} basemap={basemap} onSelect={(id) => go({ parcel: id })} />
       <div className="pointer-events-none absolute inset-x-0 top-0 space-y-3 p-4">
         <MapSearch parcels={data.parcels} onSelect={(id) => go({ parcel: id })} />
         <LayerChips layers={data.layers} active={layer} onChange={(key) => go({ layer: key === CROP_LAYER ? null : key })} />
       </div>
       <MapLegend layer={active} items={data.legend} />
+      <BasemapToggle value={basemap} onChange={setBasemap} />
     </div>
   );
 }

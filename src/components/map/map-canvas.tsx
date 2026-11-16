@@ -3,7 +3,8 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useMemo, useRef } from "react";
 import Map, { Layer, Marker, Source, type MapRef } from "react-map-gl/maplibre";
-import type { FilterSpecification, StyleSpecification } from "maplibre-gl";
+import type { FilterSpecification } from "maplibre-gl";
+import { baseStyle, type Basemap } from "./basemap";
 import { boundsOf, fillColor, toFeatures } from "./geo";
 import type { MapLayerOption, MapParcel } from "./types";
 import type { MapTheme } from "./use-map-theme";
@@ -13,12 +14,14 @@ export function MapCanvas({
   layer,
   selected,
   theme,
+  basemap,
   onSelect,
 }: {
   parcels: MapParcel[];
   layer?: MapLayerOption;
   selected: string | null;
   theme: MapTheme;
+  basemap: Basemap;
   onSelect: (id: string | null) => void;
 }) {
   const mapRef = useRef<MapRef>(null);
@@ -37,11 +40,9 @@ export function MapCanvas({
     }
   }, [selectedParcel]);
 
-  const style: StyleSpecification = {
-    version: 8,
-    sources: {},
-    layers: [{ id: "bg", type: "background", paint: { "background-color": theme.bg } }],
-  };
+  const style = useMemo(() => baseStyle(basemap, theme.bg), [basemap, theme.bg]);
+  const sat = basemap === "satellite";
+  const outline = sat ? "#fffdf7" : theme.ink;
 
   return (
     <Map
@@ -63,22 +64,22 @@ export function MapCanvas({
         <Layer
           id="rivers"
           type="line"
-          paint={{ "line-color": theme.river, "line-width": 3.5, "line-opacity": 0.9 }}
+          paint={{ "line-color": sat ? "#7cc8ee" : theme.river, "line-width": 3.5, "line-opacity": 0.9 }}
           layout={{ "line-cap": "round" }}
         />
       </Source>
       <Source id="roads" type="geojson" data="/data/roads.geojson">
-        <Layer id="roads" type="line" paint={{ "line-color": theme.road, "line-width": 2, "line-dasharray": [2, 1.5] }} />
+        <Layer id="roads" type="line" paint={{ "line-color": sat ? "#f4efe4" : theme.road, "line-width": 2, "line-dasharray": [2, 1.5] }} />
       </Source>
       <Source id="parcels" type="geojson" data={data}>
-        <Layer id="parcels-fill" type="fill" paint={{ "fill-color": fill, "fill-opacity": 0.92 }} />
+        <Layer id="parcels-fill" type="fill" paint={{ "fill-color": fill, "fill-opacity": sat ? 0.5 : 0.92 }} />
         <Layer
           id="parcels-line"
           type="line"
-          paint={{ "line-color": theme.ink, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.5, 14, 1.5] }}
+          paint={{ "line-color": outline, "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.6, 14, 1.8] }}
         />
-        <Layer id="parcels-selected-halo" type="line" filter={isSelected} paint={{ "line-color": theme.surface, "line-width": 7 }} />
-        <Layer id="parcels-selected" type="line" filter={isSelected} paint={{ "line-color": theme.ink, "line-width": 3 }} />
+        <Layer id="parcels-selected-halo" type="line" filter={isSelected} paint={{ "line-color": sat ? theme.ink : theme.surface, "line-width": 7 }} />
+        <Layer id="parcels-selected" type="line" filter={isSelected} paint={{ "line-color": sat ? "#ffd166" : theme.ink, "line-width": 3 }} />
       </Source>
       {selectedParcel && (
         <Marker longitude={selectedParcel.centroid[0]} latitude={selectedParcel.centroid[1]} anchor="bottom" offset={[0, -14]}>
