@@ -29,6 +29,8 @@ export function MapLegend({ layer, items, className = "" }: { layer?: MapLayerOp
           </div>
         </div>
       ) : (
+        <div>
+        <p className="mb-1 text-sm font-semibold text-muted">Last crop grown</p>
         <ul className="grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
           {items.map((l) => (
             <li key={l.name} className="flex items-center gap-2 text-[15px]">
@@ -37,6 +39,7 @@ export function MapLegend({ layer, items, className = "" }: { layer?: MapLayerOp
             </li>
           ))}
         </ul>
+        </div>
       )}
     </div>
   );

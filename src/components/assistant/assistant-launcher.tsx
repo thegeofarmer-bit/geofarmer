@@ -44,7 +44,7 @@ export function AssistantLauncher() {
     <button
       type="button"
       onClick={() => setOpen({ session: Date.now() })}
-      className={`fixed right-4 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-2 rounded-full bg-brand py-3 pr-5 pl-4 font-bold text-brand-ink shadow-lg ring-4 ring-brand/20 lg:right-6 lg:bottom-6 ${sheetOpen ? "max-lg:hidden" : ""}`}
+      className={`map-chrome fixed right-4 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-2 rounded-full bg-brand py-3 pr-5 pl-4 font-bold text-brand-ink shadow-lg ring-4 ring-brand/20 lg:right-6 lg:bottom-6 ${sheetOpen ? "max-lg:hidden" : ""}`}
     >
       <Icon name="assistant" size={22} />
       Ask GeoFarmer AI

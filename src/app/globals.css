@@ -99,3 +99,27 @@ body {
 .maplibregl-ctrl-attrib {
   font-size: 10px;
 }
+
+@media (max-width: 1023.98px) {
+  html[data-map-focus] .map-chrome {
+    display: none;
+  }
+
+  html[data-map-focus] main {
+    padding-bottom: 0;
+  }
+
+  html[data-map-focus] .map-page {
+    height: 100dvh;
+  }
+}
+
+@media (max-width: 1023.98px) {
+  main:has(.map-page) {
+    padding-bottom: 0;
+  }
+
+  html:not([data-map-focus]) .map-page {
+    height: calc(100dvh - 5rem - env(safe-area-inset-bottom));
+  }
+}

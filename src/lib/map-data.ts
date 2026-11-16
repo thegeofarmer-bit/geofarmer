@@ -66,6 +66,6 @@ export async function getMapData(): Promise<MapData> {
   }
 
   const grown = [...new Set(parcels.map((p) => p.latest_crop_name).filter((c): c is string => Boolean(c)))];
-  const legend = [...grown.map((name) => ({ name, color: cropColor(name) })), { name: "No crop recorded", color: NO_CROP_COLOR }];
+  const legend = [...grown.map((name) => ({ name, color: cropColor(name) })), { name: "Not recorded yet", color: NO_CROP_COLOR }];
   return { parcels: mapParcels, layers, legend };
 }

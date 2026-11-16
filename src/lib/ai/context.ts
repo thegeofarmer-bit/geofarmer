@@ -28,7 +28,8 @@ export interface AssistantContext {
   project: {
     area: string;
     mapped_parcels: number;
-    parcels_with_crop_records: number;
+    parcel_ids: string;
+    parcels_with_crop_records: { id: string; crop: string; farmer: string | null }[];
     crop_reference: {
       crop: string;
       family: string;
@@ -52,12 +53,17 @@ export async function buildContext(parcelId: string | null): Promise<AssistantCo
     getDatasets(),
     parcelId ? getParcelAnalysis(parcelId) : Promise.resolve(null),
   ]);
+  const mapped = parcels.filter((p) => p.has_geometry).sort((a, b) => a.parcel_id.localeCompare(b.parcel_id));
   return {
     method: METHOD,
     project: {
       area: "Ejura-Sekyedumase Municipality, Ashanti Region, Ghana",
-      mapped_parcels: parcels.filter((p) => p.has_geometry).length,
-      parcels_with_crop_records: parcels.filter((p) => p.latest_crop_name).length,
+      mapped_parcels: mapped.length,
+      parcel_ids: `${mapped[0]?.parcel_id} to ${mapped.at(-1)?.parcel_id}`,
+      parcels_with_crop_records: mapped
+        .filter((p) => p.latest_crop_name)
+        .slice(0, 20)
+        .map((p) => ({ id: p.parcel_id, crop: p.latest_crop_name!, farmer: p.farmer_name })),
       crop_reference: crops.map((c) => ({
         crop: c.crop_name,
         family: c.crop_family,

@@ -45,7 +45,7 @@ export function BottomNavView({ pathname }: { pathname: string }) {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 border-t-[1.5px] border-line-strong bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="map-chrome fixed inset-x-0 bottom-0 z-40 border-t-[1.5px] border-line-strong bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul className="mx-auto grid max-w-xl grid-cols-5">
         {items.map((it) => (

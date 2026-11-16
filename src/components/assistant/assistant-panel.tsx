@@ -11,6 +11,7 @@ const PARCEL_SUGGESTIONS = [
   "What data is missing for this parcel?",
 ];
 const GENERAL_SUGGESTIONS = [
+  "Which parcels can I ask about?",
   "How is crop suitability calculated?",
   "Which data comes from NASA?",
   "How does the rotation advice work?",
@@ -26,6 +27,7 @@ export function AssistantPanel({
   onClose: () => void;
 }) {
   const [messages, setMessages] = useState<UiMessage[]>([]);
+  const [focus, setFocus] = useState(parcelId);
   const [input, setInput] = useState("");
   const [pending, startTransition] = useTransition();
   const listRef = useRef<HTMLOListElement>(null);
@@ -38,7 +40,8 @@ export function AssistantPanel({
     setMessages((m) => [...m, { role: "user", content: q }]);
     setInput("");
     startTransition(async () => {
-      const r = await ask({ parcelId, question: q, history });
+      const r = await ask({ parcelId: focus, question: q, history });
+      if (r.parcelId) setFocus(r.parcelId);
       setMessages((m) => [
         ...m,
         { role: "assistant", content: r.answer, source: r.source, cached: r.cached, followUps: r.follow_ups },
@@ -57,7 +60,7 @@ export function AssistantPanel({
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, pending]);
 
-  const suggestions = parcelId ? PARCEL_SUGGESTIONS : GENERAL_SUGGESTIONS;
+  const suggestions = focus ? PARCEL_SUGGESTIONS : GENERAL_SUGGESTIONS;
 
   return (
     <div
@@ -71,7 +74,7 @@ export function AssistantPanel({
             <Icon name="assistant" size={22} className="text-brand" /> GeoFarmer AI
           </p>
           <p className="text-xs text-muted">
-            {parcelId ? `About parcel ${parcelId}` : "About all farms"} · answers only from GeoFarmer data
+            {focus ? `About parcel ${focus}` : "About all farms"} · answers only from GeoFarmer data
           </p>
         </div>
         <button type="button" onClick={onClose} aria-label="Close assistant" className="rounded-full p-1.5 hover:bg-surface-2">

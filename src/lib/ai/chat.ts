@@ -2,8 +2,10 @@ import "server-only";
 import { z } from "zod";
 import { budgetLeft, cacheKey, readCache, writeCache } from "./cache";
 import { CHAT_PROMPT_VERSION, CHAT_SCHEMA, CHAT_SYSTEM_PROMPT } from "./chat-prompt";
+import { getParcels } from "../data";
 import { buildContext, type AssistantContext } from "./context";
 import { foreignCrops, promisesOutcome, strayNumbers } from "./grounding";
+import { asksAboutAParcel, asksForParcels, parcelMenu, parcelRef, resolveParcel } from "./parcel-ref";
 import { ADVICE_MODEL } from "./prompt";
 import { runJson, type ChatMessage } from "./workers-ai";
 
@@ -22,6 +24,7 @@ export interface ChatTurn {
 export interface ChatResult extends Reply {
   source: "ai" | "rules";
   cached: boolean;
+  parcelId?: string | null;
 }
 
 function issuesFor(reply: Reply, ctx: AssistantContext, question: string): string[] {
@@ -46,7 +49,24 @@ function safeReply(ctx: AssistantContext): ChatResult {
   };
 }
 
-export async function askAssistant(parcelId: string | null, history: ChatTurn[], question: string): Promise<ChatResult> {
+export async function askAssistant(current: string | null, history: ChatTurn[], question: string): Promise<ChatResult> {
+  const parcels = await getParcels();
+  const parcelId = resolveParcel(question, history, current);
+  const known = parcels.find((p) => p.parcel_id === parcelId);
+  if (parcelId && !known?.has_geometry) {
+    return parcelMenu(parcels, known ? `${parcelId} has no mapped boundary, so GeoFarmer has no land data for it.` : `GeoFarmer has no parcel called ${parcelId}.`);
+  }
+  if (!parcelRef(question) && asksForParcels(question)) {
+    return { ...parcelMenu(parcels, "Here are the parcels you can ask about."), parcelId: current };
+  }
+  if (!parcelId && asksAboutAParcel(question)) {
+    return parcelMenu(parcels, "Which parcel do you mean?");
+  }
+  const result = await answer(parcelId, history, question);
+  return { ...result, parcelId };
+}
+
+async function answer(parcelId: string | null, history: ChatTurn[], question: string): Promise<ChatResult> {
   const ctx = await buildContext(parcelId);
   const recent = history.slice(-6).map((t) => ({ role: t.role, content: t.content.slice(0, 800) }));
   const key = cacheKey("chat", CHAT_PROMPT_VERSION, ADVICE_MODEL, ctx, recent, question.trim().toLowerCase());

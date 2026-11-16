@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { asksAboutAParcel, asksForParcels, parcelRef, resolveParcel } from "./parcel-ref";
 import type { AdviceFacts } from "./facts";
 import { rulesAdvice } from "./fallback";
 import { foreignCrops, groundingIssues, strayNumbers } from "./grounding";
@@ -54,5 +55,25 @@ describe("rules fallback", () => {
   it("always passes the grounding check", () => {
     expect(groundingIssues(rulesAdvice(facts), facts)).toEqual([]);
     expect(groundingIssues(rulesAdvice({ ...facts, rotation: null }), { ...facts, rotation: null })).toEqual([]);
+  });
+});
+
+describe("parcel references", () => {
+  it("reads parcel IDs from questions", () => {
+    expect(parcelRef("What should I plant on P5?")).toBe("P005");
+    expect(parcelRef("tell me about parcel 12")).toBe("P012");
+    expect(parcelRef("How is pH 6 scored?")).toBeNull();
+  });
+
+  it("keeps the parcel from earlier in the chat", () => {
+    const history = [{ role: "user" as const, content: "About P020 please" }];
+    expect(resolveParcel("What data is missing?", history, null)).toBe("P020");
+    expect(resolveParcel("And P021?", history, null)).toBe("P021");
+  });
+
+  it("spots vague and list questions", () => {
+    expect(asksAboutAParcel("What should I plant on this parcel?")).toBe(true);
+    expect(asksForParcels("Which parcels can I ask about?")).toBe(true);
+    expect(asksAboutAParcel("How is suitability calculated?")).toBe(false);
   });
 });

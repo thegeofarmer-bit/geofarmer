@@ -17,6 +17,7 @@ const PATHS = {
   chev: "M9 6l6 6-6 6",
   back: "M15 6l-6 6 6 6",
   calendar: "M4 6h16v15H4zM4 10h16M8 3v4M16 3v4",
+  expand: "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5",
   layers: "M12 3 2 8.5 12 14l10-5.5zM2 13l10 5.5L22 13",
   leaf: "M5 19c0-8 5-14 15-15-1 10-7 15-15 15zM5 19l7-7",
   drop: "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z",

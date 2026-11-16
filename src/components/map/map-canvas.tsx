@@ -2,7 +2,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useMemo, useRef } from "react";
-import Map, { Layer, Marker, Source, type MapRef } from "react-map-gl/maplibre";
+import Map, { AttributionControl, Layer, Marker, Source, type MapRef } from "react-map-gl/maplibre";
 import type { FilterSpecification } from "maplibre-gl";
 import { baseStyle, type Basemap } from "./basemap";
 import { boundsOf, fillColor, toFeatures } from "./geo";
@@ -15,14 +15,18 @@ export function MapCanvas({
   selected,
   theme,
   basemap,
+  mobile,
   onSelect,
+  onInteract,
 }: {
   parcels: MapParcel[];
   layer?: MapLayerOption;
   selected: string | null;
   theme: MapTheme;
   basemap: Basemap;
+  mobile: boolean;
   onSelect: (id: string | null) => void;
+  onInteract: () => void;
 }) {
   const mapRef = useRef<MapRef>(null);
   const bounds = useMemo(() => boundsOf(parcels), [parcels]);
@@ -58,8 +62,15 @@ export function MapCanvas({
       interactiveLayerIds={["parcels-fill"]}
       onClick={(e) => onSelect((e.features?.[0]?.properties?.id as string | undefined) ?? null)}
       cursor="pointer"
-      attributionControl={{ compact: true, customAttribution: "Rivers, roads: GeoFarmer GIS team" }}
+      onMoveStart={(e) => e.originalEvent && onInteract()}
+      attributionControl={false}
     >
+      <AttributionControl
+        key={mobile ? "m" : "d"}
+        position={mobile ? "bottom-left" : "bottom-right"}
+        compact
+        customAttribution="Rivers, roads: GeoFarmer GIS team"
+      />
       <Source id="rivers" type="geojson" data="/data/rivers.geojson">
         <Layer
           id="rivers"
