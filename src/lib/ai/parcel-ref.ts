@@ -7,7 +7,7 @@ export interface ChatTurnLike {
 
 const ID = /\bP\s?-?(\d{1,4})\b/i;
 const NUMBERED = /\b(?:parcel|farm|plot|field)\s*(?:no\.?|number|#)?\s*(\d{1,4})\b/i;
-const VAGUE = /\b(?:this|my|the|that|our)\s+(?:parcel|farm|plot|field)s?\b|\bplant (?:next|here)\b/i;
+const VAGUE = /\b(?:this|my|the|that|our)\s+(?:parcel|farm|plot|field)s?\b|\b(?:plant|grow)\w* (?:next|here)\b|\b(?:last|previous|current|this) crop\b/i;
 
 export function parcelRef(text: string): string | null {
   const m = text.match(ID) ?? text.match(NUMBERED);
@@ -52,6 +52,7 @@ export function parcelMenu(parcels: ParcelOverview[], intro: string) {
       `${intro} GeoFarmer has ${mapped.length} mapped parcels, ${mapped[0]} to ${mapped[mapped.length - 1]}. ` +
       `For example: ${picks.map(describe).join("; ")}. Name a parcel ID and I'll answer from its data, or tap one on the Map tab.`,
     follow_ups: picks.map((p) => `What should I plant on ${p.parcel_id}?`),
+    links: [{ label: "Browse parcels on the map", href: "/map" }],
     source: "rules" as const,
     cached: false,
   };

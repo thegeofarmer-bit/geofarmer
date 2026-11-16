@@ -44,7 +44,7 @@ export function AssistantPanel({
       if (r.parcelId) setFocus(r.parcelId);
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: r.answer, source: r.source, cached: r.cached, followUps: r.follow_ups },
+        { role: "assistant", content: r.answer, source: r.source, cached: r.cached, followUps: r.follow_ups, links: r.links },
       ]);
     });
   };
@@ -104,7 +104,7 @@ export function AssistantPanel({
           </li>
         )}
         {messages.map((m, i) => (
-          <MessageBubble key={i} message={m} onFollowUp={send} />
+          <MessageBubble key={i} message={m} onFollowUp={send} onLink={onClose} />
         ))}
         {pending && (
           <li className="flex items-center gap-2 text-muted" aria-live="polite">

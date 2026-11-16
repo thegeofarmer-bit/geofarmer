@@ -3,6 +3,7 @@ import { z } from "zod";
 import { budgetLeft, cacheKey, readCache, writeCache } from "./cache";
 import { CHAT_PROMPT_VERSION, CHAT_SCHEMA, CHAT_SYSTEM_PROMPT } from "./chat-prompt";
 import { getParcels } from "../data";
+import { followUps, links, ruleAnswer, rulesSummary, type ChatLink } from "./chat-extras";
 import { buildContext, type AssistantContext } from "./context";
 import { foreignCrops, promisesOutcome, strayNumbers } from "./grounding";
 import { asksAboutAParcel, asksForParcels, parcelMenu, parcelRef, resolveParcel } from "./parcel-ref";
@@ -25,6 +26,7 @@ export interface ChatResult extends Reply {
   source: "ai" | "rules";
   cached: boolean;
   parcelId?: string | null;
+  links?: ChatLink[];
 }
 
 function issuesFor(reply: Reply, ctx: AssistantContext, question: string): string[] {
@@ -37,16 +39,8 @@ function issuesFor(reply: Reply, ctx: AssistantContext, question: string): strin
   return issues;
 }
 
-function safeReply(ctx: AssistantContext): ChatResult {
-  const rec = ctx.parcel?.rotation?.recommended.crop ?? ctx.parcel?.suitability.top[0]?.crop;
-  return {
-    answer: rec
-      ? `I couldn't answer that reliably from GeoFarmer's data. What the rules do show: ${rec} is the suggested crop for parcel ${ctx.parcel!.parcel.id}.`
-      : "I couldn't answer that reliably from GeoFarmer's data. Try asking about a parcel's crops, rotation or data sources.",
-    follow_ups: ["What data is missing?", "How is suitability calculated?"],
-    source: "rules",
-    cached: false,
-  };
+function safeReply(ctx: AssistantContext, lead = "I couldn't check that answer against GeoFarmer's data."): ChatResult {
+  return { answer: `${lead} ${rulesSummary(ctx)}`, follow_ups: [], source: "rules", cached: false };
 }
 
 export async function askAssistant(current: string | null, history: ChatTurn[], question: string): Promise<ChatResult> {
@@ -62,18 +56,22 @@ export async function askAssistant(current: string | null, history: ChatTurn[], 
   if (!parcelId && asksAboutAParcel(question)) {
     return parcelMenu(parcels, "Which parcel do you mean?");
   }
-  const result = await answer(parcelId, history, question);
-  return { ...result, parcelId };
+  const ctx = await buildContext(parcelId);
+  const asked = history.filter((t) => t.role === "user").map((t) => t.content);
+  const extras = { follow_ups: followUps(ctx, question, asked), links: links(ctx), parcelId };
+  const direct = ruleAnswer(ctx, question);
+  if (direct) return { answer: direct, source: "rules", cached: false, ...extras };
+  const result = await answer(ctx, parcelId, history, question);
+  return { ...result, ...extras };
 }
 
-async function answer(parcelId: string | null, history: ChatTurn[], question: string): Promise<ChatResult> {
-  const ctx = await buildContext(parcelId);
+async function answer(ctx: AssistantContext, parcelId: string | null, history: ChatTurn[], question: string): Promise<ChatResult> {
   const recent = history.slice(-6).map((t) => ({ role: t.role, content: t.content.slice(0, 800) }));
   const key = cacheKey("chat", CHAT_PROMPT_VERSION, ADVICE_MODEL, ctx, recent, question.trim().toLowerCase());
   const cached = await readCache<Reply>(key);
   if (cached) return { ...cached.content, source: "ai", cached: true };
   if (!(await budgetLeft())) {
-    return { ...safeReply(ctx), answer: "Today's free AI allowance is used up. The rules-based results on each parcel page are still available." };
+    return safeReply(ctx, "Today's AI allowance is used up, so here is the rules result.");
   }
 
   const messages: ChatMessage[] = [
@@ -109,6 +107,6 @@ async function answer(parcelId: string | null, history: ChatTurn[], question: st
     }
     return safeReply(ctx);
   } catch {
-    return { ...safeReply(ctx), answer: "The AI service is unavailable right now. Please try again shortly." };
+    return safeReply(ctx, "The AI didn't respond in time, so here is the rules result.");
   }
 }
