@@ -21,7 +21,7 @@ const INTENTS: [RegExp, RegExp][] = [
 const sameIntent = (option: string, question: string) =>
   INTENTS.some(([o, q]) => o.test(option) && q.test(question));
 
-export function recommendation(ctx: AssistantContext) {
+function recommendation(ctx: AssistantContext) {
   const p = ctx.parcel;
   if (!p) return null;
   if (p.rotation) {
@@ -32,7 +32,7 @@ export function recommendation(ctx: AssistantContext) {
   return top ? { crop: top.crop, why: top.reasons, basis: "suitability" as const } : null;
 }
 
-export function sameFamily(ctx: AssistantContext, crop: string) {
+function sameFamily(ctx: AssistantContext, crop: string) {
   const family = ctx.project.crop_reference.find((c) => c.crop === crop)?.family;
   return family ? { family, crops: ctx.project.crop_reference.filter((c) => c.family === family && c.crop !== crop).map((c) => c.crop) } : null;
 }
